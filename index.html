@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>오늘도 화이팅! 🔥</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "맑은 고딕", sans-serif;
+      background: linear-gradient(135deg, #fde2e4, #e0f7fa);
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container { width: 100%; max-width: 480px; }
+
+    h1 { text-align: center; font-size: 24px; margin-bottom: 4px; color: #1a1a1a; }
+
+    .subtitle { text-align: center; font-size: 13px; color: #888; margin-bottom: 20px; }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+
+    .card h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #1a1a1a; }
+
+    label { font-size: 13px; font-weight: 600; color: #555; display: block; margin-bottom: 5px; }
+
+    input[type="text"], input[type="date"], select, textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid #e0e0e0; font-size: 14px; margin-bottom: 12px;
+      background: #fafafa; color: #1a1a1a; outline: none; transition: border 0.15s;
+    }
+
+    input:focus, select:focus, textarea:focus { border-color: #ff8a80; }
+    textarea { resize: vertical; min-height: 60px; }
+
+    button {
+      width: 100%; padding: 13px; border-radius: 999px; border: none;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    button:active { transform: scale(0.98); }
+
+    .btn-main { background: linear-gradient(135deg, #ff7a7a, #ff5252); color: #fff; }
+    .btn-secondary { background: #eceff1; color: #546e7a; margin-top: 8px; }
+
+    .small { font-size: 12px; color: #999; line-height: 1.6; }
+
+    .msg { font-size: 13px; margin-top: 8px; padding: 8px 12px; border-radius: 8px; display: none; }
+    .msg.success { background: #e8f5e9; color: #2e7d32; display: block; }
+    .msg.error { background: #ffebee; color: #c62828; display: block; }
+    .msg.info { background: #e3f2fd; color: #1565c0; display: block; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .tabBtn {
+      flex: 1; padding: 11px; border-radius: 999px; border: none;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      background: #fff; color: #999;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08); transition: all 0.15s;
+    }
+    .tabBtn.active { background: linear-gradient(135deg, #ff7a7a, #ff5252); color: #fff; }
+
+    .memberCard {
+      background: #fafafa; border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 10px; border: 1px solid #f0f0f0;
+    }
+    .memberCard .name { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #1a1a1a; }
+    .memberCard .row {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: #555; padding: 3px 0; border-bottom: 1px solid #f0f0f0;
+    }
+    .memberCard .row:last-of-type { border-bottom: none; }
+    .memberCard .row span:last-child { font-weight: 600; color: #333; }
+    .memberCard .updatedAt { font-size: 11px; color: #bbb; margin-top: 6px; text-align: right; }
+
+    .dday-box {
+      background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+      border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;
+      font-size: 13px; color: #e65100; font-weight: 600; text-align: center;
+    }
+
+    .rank-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-pos { font-size: 20px; width: 36px; text-align: center; flex-shrink: 0; }
+    .rank-name { flex: 1; font-weight: 600; color: #1a1a1a; }
+    .rank-me { font-size: 11px; color: #ff5252; margin-left: 4px; font-weight: 700; }
+    .rank-score { font-size: 16px; font-weight: 700; color: #ff5252; min-width: 56px; text-align: right; }
+    .rank-score span { font-size: 12px; color: #bbb; font-weight: 400; }
+
+    .loading { text-align: center; padding: 30px; color: #bbb; font-size: 14px; }
+
+    #registrationView, #pendingView, #appView { display: none; }
+    #summaryView, #detailView { display: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>오늘도 화이팅! 🔥</h1>
+  <p class="subtitle" id="subtitle">가족 다이어트 & 오운완 같이 해요 💪</p>
+
+  <div id="loadingView" class="card loading">데이터 불러오는 중...</div>
+
+  <div id="registrationView" class="card">
+    <h3>처음이신가요? 👋</h3>
+    <label>이름 / 닉네임</label>
+    <input type="text" id="regName" placeholder="예: 미정, 남편, 아들" />
+    <button class="btn-main" onclick="registerMember()">가입 신청하기</button>
+    <p class="small" style="margin-top:10px;">관리자가 승인하면 사용할 수 있어요.</p>
+    <div id="regMsg" class="msg"></div>
+  </div>
+
+  <div id="pendingView" class="card">
+    <h3>승인 대기 중 🙏</h3>
+    <p class="small" id="pendingText" style="margin-bottom:14px;">관리자가 아직 승인하지 않았어요.</p>
+    <button class="btn-main" onclick="reloadCheck()">다시 확인하기</button>
+    <button class="btn-secondary" onclick="logout()">다른 계정으로 시작</button>
+  </div>
+
+  <div id="appView">
+    <div class="tabs">
+      <button class="tabBtn active" id="tabSummary" onclick="showTab('summary')">🏆 랭킹</button>
+      <button class="tabBtn" id="tabDetail" onclick="showTab('detail')">📋 오늘 체크</button>
+    </div>
+
+    <div id="summaryView">
+      <div id="ddayBox" class="dday-box"></div>
+      <div class="card">
+        <h3>누적 점수 랭킹</h3>
+        <div id="rankingList"><div class="loading">불러오는 중...</div></div>
+      </div>
+    </div>
+
+    <div id="detailView">
+      <div class="card">
+        <label>날짜</label>
+        <input type="date" id="targetDate" onchange="onDateChange()" />
+      </div>
+
+      <div class="card">
+        <h3 id="checkTitle">오늘의 체크 ✅</h3>
+
+        <label>운동 💪</label>
+        <select id="workout">
+          <option value="">선택</option>
+          <option value="1시간 이상">1시간 이상 (3점)</option>
+          <option value="30분 이상">30분 이상 (2점)</option>
+          <option value="30분 이하">30분 이하 (1점)</option>
+          <option value="휴식">휴식 (0점)</option>
+        </select>
+
+        <label>자기개발 📚</label>
+        <select id="selfdev">
+          <option value="">선택</option>
+          <option value="1시간 이상">1시간 이상 (3점)</option>
+          <option value="30분 이상">30분 이상 (2점)</option>
+          <option value="30분 이하">30분 이하 (1점)</option>
+          <option value="휴식">휴식 (0점)</option>
+        </select>
+
+        <label>식단 🍽️</label>
+        <select id="diet">
+          <option value="">선택</option>
+          <option value="다이어트 식단">다이어트 식단 (3점)</option>
+          <option value="노간식">노간식 (2점)</option>
+          <option value="2끼 이상+간식">2끼 이상+간식 (1점)</option>
+          <option value="오늘은 포기">오늘은 포기 (0점)</option>
+        </select>
+
+        <label>메모 📝</label>
+        <textarea id="memo" placeholder="예: 러닝 30분 / 야식 참음"></textarea>
+
+        <button class="btn-main" onclick="saveToday()">저장하기</button>
+        <div id="saveMsg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <h3>멤버별 현황</h3>
+        <div id="memberDetail"><div class="loading">불러오는 중...</div></div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:8px;">
+      <button class="btn-secondary" style="width:auto; padding:8px 20px; font-size:13px;" onclick="logout()">
+        다른 계정으로 전환
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbz5vmoplHT5Hrab66DQ81erftPCD0Ibk2Dlon26AiGGgHviAExS8Bpvu7-XE1UxO3kTYA/exec";
+
+  let currentMemberId = null;
+  let currentMemberName = null;
+  let currentDate = null;
+
+  async function api(params) {
+    const url = new URL(API_URL);
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v ?? ""));
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error("서버 오류: " + res.status);
+    const data = await res.json();
+    if (data && data.error) throw new Error(data.error);
+    return data;
+  }
+
+  function showView(id) {
+    ["loadingView","registrationView","pendingView","appView"].forEach(v => {
+      document.getElementById(v).style.display = "none";
+    });
+    document.getElementById(id).style.display = "block";
+  }
+
+  function showTab(tab) {
+    document.getElementById("summaryView").style.display = "none";
+    document.getElementById("detailView").style.display = "none";
+    document.getElementById("tabSummary").classList.remove("active");
+    document.getElementById("tabDetail").classList.remove("active");
+
+    if (tab === "summary") {
+      document.getElementById("summaryView").style.display = "block";
+      document.getElementById("tabSummary").classList.add("active");
+      loadSummary();
+    } else {
+      document.getElementById("detailView").style.display = "block";
+      document.getElementById("tabDetail").classList.add("active");
+      loadDaily(currentDate);
+    }
+  }
+
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + "T00:00:00");
+    const days = ["일","월","화","수","목","금","토"];
+    return `${d.getMonth()+1}월 ${d.getDate()}일(${days[d.getDay()]})`;
+  }
+
+  function onDateChange() {
+    const v = document.getElementById("targetDate").value;
+    if (!v) return;
+    currentDate = v;
+    document.getElementById("checkTitle").textContent = formatDate(v) + " 체크 ✅";
+    loadDaily(v);
+  }
+
+  async function registerMember() {
+    const name = document.getElementById("regName").value.trim();
+    const msg = document.getElementById("regMsg");
+    msg.className = "msg";
+    if (!name) { msg.className = "msg error"; msg.textContent = "이름을 입력해주세요."; return; }
+
+    try {
+      const data = await api({ action: "register", name });
+      currentMemberId = data.id;
+      currentMemberName = data.name;
+      localStorage.setItem("owoon_member_id", data.id);
+      document.getElementById("pendingText").textContent =
+        `${data.name}님으로 가입 신청 완료! 관리자 승인 후 사용 가능해요.`;
+      showView("pendingView");
+    } catch(e) {
+      msg.className = "msg error";
+      msg.textContent = e.message || "오류가 발생했습니다.";
+    }
+  }
+
+  async function reloadCheck() {
+    const storedId = localStorage.getItem("owoon_member_id");
+    if (!storedId) { showView("registrationView"); return; }
+    showView("loadingView");
+
+    try {
+      const data = await api({ action: "getMember", memberId: storedId });
+      if (!data || !data.id) { logout(); return; }
+
+      currentMemberId = data.id;
+      currentMemberName = data.name;
+      document.getElementById("subtitle").textContent = data.name + "님, 오늘도 화이팅! 💪";
+
+      if (data.active !== "Y") {
+        document.getElementById("pendingText").textContent =
+          `${data.name}님은 아직 승인 대기 중이에요.`;
+        showView("pendingView");
+      } else {
+        currentDate = todayStr();
+        document.getElementById("targetDate").value = currentDate;
+        document.getElementById("checkTitle").textContent = formatDate(currentDate) + " 체크 ✅";
+        showView("appView");
+        showTab("summary");
+      }
+    } catch(e) {
+      showView("registrationView");
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("owoon_member_id");
+    currentMemberId = null;
+    currentMemberName = null;
+    document.getElementById("subtitle").textContent = "가족 다이어트 & 오운완 같이 해요 💪";
+    showView("registrationView");
+  }
+
+  async function saveToday() {
+    if (!currentMemberId) { alert("먼저 로그인해주세요."); return; }
+    const msg = document.getElementById("saveMsg");
+    msg.className = "msg info"; msg.textContent = "저장 중...";
+
+    try {
+      await api({
+        action: "save",
+        memberId: currentMemberId,
+        date: currentDate,
+        workout: document.getElementById("workout").value,
+        selfdev: document.getElementById("selfdev").value,
+        diet: document.getElementById("diet").value,
+        memo: document.getElementById("memo").value,
+      });
+      msg.className = "msg success"; msg.textContent = "저장됐어요! 😊";
+      loadDaily(currentDate);
+    } catch(e) {
+      msg.className = "msg error"; msg.textContent = e.message || "저장 중 오류가 발생했습니다.";
+    }
+  }
+
+  async function loadDaily(dateStr) {
+    const box = document.getElementById("memberDetail");
+    box.innerHTML = '<div class="loading">불러오는 중...</div>';
+    try {
+      const list = await api({ action: "daily", date: dateStr });
+      const mine = list.find(r => r.memberId === currentMemberId) || {};
+      document.getElementById("workout").value = mine.workout || "";
+      document.getElementById("selfdev").value = mine.selfdev || "";
+      document.getElementById("diet").value = mine.diet || "";
+      document.getElementById("memo").value = mine.memo || "";
+
+      box.innerHTML = "";
+      list.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "memberCard";
+        const isMe = m.memberId === currentMemberId;
+        div.innerHTML = `
+          <div class="name">${m.name}${isMe ? ' <span style="font-size:11px;color:#ff5252;">(나)</span>' : ''}</div>
+          <div class="row"><span>운동 💪</span><span>${m.workout || "-"}</span></div>
+          <div class="row"><span>자기개발 📚</span><span>${m.selfdev || "-"}</span></div>
+          <div class="row"><span>식단 🍽️</span><span>${m.diet || "-"}</span></div>
+          <div class="row"><span>메모 📝</span><span>${m.memo || "-"}</span></div>
+          ${m.updatedAt ? `<div class="updatedAt">마지막 수정 ${m.updatedAt}</div>` : ""}
+        `;
+        box.appendChild(div);
+      });
+    } catch(e) {
+      box.innerHTML = `<p class="msg error" style="display:block;">${e.message}</p>`;
+    }
+  }
+
+  async function loadSummary() {
+    const listBox = document.getElementById("rankingList");
+    const ddayBox = document.getElementById("ddayBox");
+    listBox.innerHTML = '<div class="loading">불러오는 중...</div>';
+
+    try {
+      const data = await api({ action: "summary" });
+      ddayBox.textContent = data.daysLeft > 0
+        ? `🗓️ D-${data.daysLeft} · ${data.endDate}까지 누적 점수 랭킹`
+        : `🎉 D-DAY! · ${data.endDate} 최종 랭킹`;
+
+      const medals = ["🥇","🥈","🥉"];
+      listBox.innerHTML = "";
+      data.ranking.forEach((r, i) => {
+        const div = document.createElement("div");
+        div.className = "rank-item";
+        const isMe = r.memberId === currentMemberId;
+        div.innerHTML = `
+          <span class="rank-pos">${medals[i] || (i+1)+"위"}</span>
+          <span class="rank-name">${r.name}${isMe ? '<span class="rank-me">(나)</span>' : ""}</span>
+          <span class="rank-score">${r.score}<span>점</span></span>
+        `;
+        listBox.appendChild(div);
+      });
+    } catch(e) {
+      listBox.innerHTML = `<p class="msg error" style="display:block;">${e.message}</p>`;
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const storedId = localStorage.getItem("owoon_member_id");
+    storedId ? reloadCheck() : showView("registrationView");
+  });
+</script>
+</body>
+</html>
